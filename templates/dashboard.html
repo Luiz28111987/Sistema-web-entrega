@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>Dashboard - Sistema de Gestão de Entregas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="page">  
+  <main class="dashboard-container">
+    <h1>Dashboard</h1>
+    <nav class="buttons-container">
+      <button onclick="location.href='/cadastrar-motorista'">Cadastrar Motorista</button>
+      <button onclick="location.href='cadastra_veiculo'">Cadastra Veiculo</button>
+      <button onclick="location.href='cadastra_regiao.html'">Cadastra Região</button>
+      <button onclick="location.href='inserir_entrega.html'">Inserir Entrega</button>
+      <button onclick="location.href='finalizar_entrega.html'">Finalizar Entrega</button>
+      <button onclick="location.href='consultar_entrega.html'">Consultar Entrega</button>
+      <button onclick="location.href='relatorios.html'">Relatórios</button>
+
+      <button onclick="location.href='login.html'">Sair</button>
+    </nav>
+  </main>
+</body>
+</html>
