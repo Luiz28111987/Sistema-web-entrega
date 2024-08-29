@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inserir Entrega</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            margin-top: 50px;
+            box-shadow: 0px 0px 10px 0px #000;
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+        /* Media queries */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            input[type="text"], input[type="number"], select {
+                padding: 8px;
+            }
+            input[type="submit"] {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Inserir Entrega</h1>
+    <form action="#" method="POST">
+        <label for="numero-entrega">Número da Entrega:</label>
+        <input type="text" id="numero-entrega" name="numero-entrega" value="1" readonly>
+
+        <label for="motorista">Motorista:</label>
+        <input type="text" id="motorista" name="motorista" required>
+
+        <label for="veiculo">Veículo:</label>
+        <input type="text" id="veiculo" name="veiculo" required>
+
+        <label for="placa">Placa:</label>
+        <input type="text" id="placa" name="placa" required>
+
+        <label for="km-inicial">KM Inicial:</label>
+        <input type="number" id="km-inicial" name="km-inicial" required>
+
+        <label for="num-notas">Número de Notas:</label>
+        <input type="number" id="num-notas" name="num-notas" required>
+
+        <label for="data">Data:</label>
+        <input type="text" id="data" name="data" value="<!-- Data automática -->" readonly>
+
+        <label for="regioes">Regiões:</label>
+        <input type="text" id="regioes" name="regioes" placeholder="Ex: Sobradinho/Ceilândia/Taguatinga" required>
+
+        <input type="submit" value="Inserir Entrega">
+    </form>
+</div>
+
+<script>
+    // Script para gerar automaticamente a data atual
+    const data = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('data').value = data;
+
+    // Script para gerar automaticamente o número da entrega
+    // Você precisará implementar isso de forma dinâmica no backend
+    const numeroEntrega = 1; // Este número deve ser gerado dinamicamente
+    document.getElementById('numero-entrega').value = numeroEntrega;
+</script>
+
+</body>
+</html>
