@@ -17,7 +17,7 @@ document.getElementById('loginForm').addEventListener('submit', (event) => {
   // Verificação de credenciais (substitua por sua lógica de autenticação)
   if (username === 'Admin' && password === 'admin') {
     // Redirecionamento
-    window.location.href = 'dashboard.html';
+    window.location.href = '/dashboard';
   } else {
     // Exibe mensagem de erro se as credenciais estiverem incorretas
     document.getElementById('error-message').textContent = 'Usuário ou senha incorretos!';

@@ -8,15 +8,15 @@
   <main class="dashboard-container">
     <h1>Dashboard</h1>
     <nav class="buttons-container">
-      <button onclick="location.href='/cadastrar-motorista'">Cadastrar Motorista</button>
-      <button onclick="location.href='cadastra_veiculo'">Cadastra Veiculo</button>
-      <button onclick="location.href='cadastra_regiao.html'">Cadastra Região</button>
-      <button onclick="location.href='inserir_entrega.html'">Inserir Entrega</button>
-      <button onclick="location.href='finalizar_entrega.html'">Finalizar Entrega</button>
-      <button onclick="location.href='consultar_entrega.html'">Consultar Entrega</button>
-      <button onclick="location.href='relatorios.html'">Relatórios</button>
+      <button onclick="location.href='/cadastra_motorista'">Cadastrar Motorista</button>
+      <button onclick="location.href='/cadastra_veiculo'">Cadastra Veiculo</button>
+      <button onclick="location.href='/cadastra_regiao.html'">Cadastra Região</button>
+      <button onclick="location.href='/inserir_entrega.html'">Inserir Entrega</button>
+      <button onclick="location.href='/finalizar_entrega.html'">Finalizar Entrega</button>
+      <button onclick="location.href='/consultar_entrega.html'">Consultar Entrega</button>
+      <button onclick="location.href='/relatorios.html'">Relatórios</button>
 
-      <button onclick="location.href='login.html'">Sair</button>
+      <button onclick="location.href='{{ url_for('login') }}'">Sair</button>
     </nav>
   </main>
 </body>
