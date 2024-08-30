@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar Motorista</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='formulario.css') }}">
+  <title>Dashboard - Sistema de Gestão de Entregas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    <div class="container">
-        <h1>Cadastrar Motorista</h1>
-        <form method="POST" action="/">
-            <label for="motorista_id">Número do Motorista:</label>
-            <input type="text" id="motorista_id" name="motorista_id" value="{{ proximo_id }}" readonly>
-            
-            <label for="motorista">Nome do Motorista:</label>
-            <input type="text" id="motorista" name="motorista" placeholder="Digite o nome do motorista" required>
-            
-            <input type="submit" value="Cadastrar Motorista">
-        </form>
-    </div>
+<body class="page">  
+  <main class="dashboard-container">
+    <h1>Cadastrar Motorista</h1>
+    
+    <form method="POST" action="/cadastra_motorista" class="buttons-container">
+      <label for="motorista_id">Codigo do Motorista:</label>
+      <input type="number" id="motorista_id" name="motorista_id" value="{{ proximo_id }}" readonly>
+      
+      <label for="motorista">Nome do Motorista:</label>
+      <input type="text" id="motorista" name="motorista" placeholder="Digite o nome do motorista" required>
+      
+      <input type="submit" value="Cadastrar Motorista">
+
+      <button type="button" onclick="location.href='/dashboard'">Sair</button>
+    </form>
+    
+  </main>
 </body>
 </html>
