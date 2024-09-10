@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Entrega</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Entregas Aguardando Retorno</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Numero Entrega</th>
+                    <th>Data</th>
+                    <th>Hora Saida</th>
+                    <th>Motorista</th>
+                    <th>Veículo</th>
+                    <th>Placa</th>                    
+                    <th>Quantidade Notas</th>
+                    <th>Regioes</th>
+                    <th>Selecionar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrega in dados %}
+                <tr>
+                    <td>{{ entrega[0] }}</td> <!-- Número da Entrega -->
+                    <td>{{ entrega[1] }}</td> <!-- Data -->
+                    <td>{{ entrega[2] }}</td> <!-- Hora da Saida -->
+                    <td>{{ entrega[5] }}</td> <!-- Motorista -->
+                    <td>{{ entrega[6] }}</td> <!-- Veiculo -->
+                    <td>{{ entrega[7] }}</td> <!-- Placa -->
+                    <td>{{ entrega[8] }}</td> <!-- Quantidade de Notas -->
+                    <td>{{ entrega[10] }}</td> <!-- Regiões da entrega -->
+                    <td>
+                        <button class="btn btn-primary alterar" data-id="{{ entrega[0] }}">Alterar</button>
+                    </td>                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-primary" onclick="location.href='/dashboard'">Sair</button>
+        </div>
+    </div>
+    <script>
+        const botoesAlterar = document.querySelectorAll('.alterar');
+    
+        botoesAlterar.forEach(botao => {
+            botao.addEventListener('click', () => {
+                const idEntrega = botao.dataset.id;
+                const url = `/editar_entrega/${idEntrega}`; // Ajustar a URL conforme sua rota
+                window.location.href = url;
+            });
+        });
+    </script>
+</body>
+</html>
