@@ -9,178 +9,57 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
-<div class="container">
-    <h1>Inserir Entrega</h1>
-    <form action="{{ url_for('inserir_entrega') }}" method="POST">
-
-        <label for="numero_entrega">Número da Entrega:</label>
-        <input type="text" id="numero_entrega" name="numero_entrega" readonly>
-
-        <label for="motorista">Motorista:</label>
-        <input type="text" id="busca-motorista" name="motorista" required>
-        <ul id="sugestoes-motorista"></ul>
-
-        <label for="placa">Placa:</label>
-        <input type="text" id="busca-placa" name="placa" placeholder="Digite a placa" required>
-        <ul id="sugestoes-placa"></ul>
-
-        <label for="veiculo">Veículo:</label>
-        <input type="text" id="veiculo" name="veiculo" required>
-
-        <label for="km-inicial">KM Inicial:</label>
-        <input type="number" id="km-inicial" name="km-inicial" required>
-
-        <label for="num-notas">Número de Notas:</label>
-        <input type="number" id="num-notas" name="num-notas" required>
-        
-        <label for="regioes">Regiões:</label>
-        <input type="text" id="busca-regiao" name="regioes" placeholder="Ex: Sobradinho/Ceilândia/Taguatinga">
-        <ul id="sugestoes-regiao"></ul>
-        <ul id="itemList"></ul>
-
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-primary" id="limpar-regioes">Limpar Regiões Selecionadas</button> <!-- Botão para limpar regiões selecionadas -->
-                </div>
-                <div class="col-md-4">
-                    <input type="submit" class="btn btn-primary" value="Inserir Entrega">
-                </div>
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-primary" onclick="location.href='{{ url_for('dashboard') }}'">Sair</button>
+    <div class="container">
+        <h1>Inserir Entrega</h1>
+    
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+    
+        <form action="{{ url_for('inserir_entrega') }}" method="POST">
+    
+            <label for="numero_entrega">Número da Entrega:</label>
+            <input type="text" id="numero_entrega" name="numero_entrega" value="{{ numero_entrega }}" readonly>
+    
+            <label for="motorista">Motorista:</label>
+            <input type="text" id="busca-motorista" name="motorista" value="{{ motorista }}" required>
+            <ul id="sugestoes-motorista"></ul>
+    
+            <label for="placa">Placa:</label>
+            <input type="text" id="busca-placa" name="placa" value="{{ placa }}" placeholder="Digite a placa" required>
+            <ul id="sugestoes-placa"></ul>
+    
+            <label for="veiculo">Veículo:</label>
+            <input type="text" id="veiculo" name="veiculo" value="{{ veiculo }}" required readonly>
+    
+            <label for="km-inicial">KM Inicial:</label>
+            <input type="number" id="km-inicial" name="km-inicial" value="{{ km_inicial }}" required>
+    
+            <label for="num-notas">Número de Notas:</label>
+            <input type="number" id="num-notas" name="num-notas" value="{{ num_notas }}" required>
+    
+            <label for="regioes">Regiões:</label>
+            <input type="text" id="busca-regiao" name="regioes" value="{{ regioes }}" placeholder="Ex: Sobradinho/Ceilândia/Taguatinga">
+            <ul id="sugestoes-regiao"></ul>
+            <ul id="itemList"></ul>
+    
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary" id="limpar-regioes">Limpar Regiões Selecionadas</button>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="submit" class="btn btn-primary" value="Inserir Entrega">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary" onclick="location.href='/dashboard'">Sair</button>
+                    </div>
                 </div>
             </div>
-        </div>        
-    </form>
-</div>
-<script>
-    $(document).ready(function(){
-        // Quando a página carregar, buscar o próximo número de entrega
-        $.get("/numero_entrega", function(data){
-            $("#numero_entrega").val(data.proximo_id);  // Preenche o campo com o proximo_id retornado
-        });
-
-        // Debounce para sugestão de placas
-        let debounceTimeoutPlaca;
-        $("#busca-placa").on("input", function(){
-            clearTimeout(debounceTimeoutPlaca);
-            var termo = $(this).val();
-            debounceTimeoutPlaca = setTimeout(function(){
-                $.get("/sugestoes-placa", { termo: termo })
-                  .done(function(data) {
-                    $("#sugestoes-placa").empty();
-                    $.each(data, function(index, value) {
-                        $("#sugestoes-placa").append("<li class='sugestao-placa'>" + value + "</li>");
-                    });
-                });
-            }, 300);
-        });
-
-        // Seleção de placa
-        $(document).on("click", ".sugestao-placa", function(){
-            var placaSelecionada = $(this).text();
-            $("#busca-placa").val(placaSelecionada);
-            $("#sugestoes-placa").empty();
-
-            // Fazer a requisição para buscar o tipo de veículo com base na placa
-            $.get("/get-tipo-veiculo", { placa: placaSelecionada })
-              .done(function(data) {
-                if (data.tipo_veiculo) {
-                    // Insere o tipo de veículo no campo "veiculo"
-                    $("#veiculo").val(data.tipo_veiculo);
-                }
-              })
-              .fail(function(){
-                alert("Tipo de veículo não encontrado");
-              });
-        });
-
-        // Debounce para sugestão de motoristas
-        let debounceTimeoutMotorista;
-        $("#busca-motorista").on("input", function(){
-            clearTimeout(debounceTimeoutMotorista);
-            var termo = $(this).val();
-            debounceTimeoutMotorista = setTimeout(function(){
-                $.get("/sugestoes-motorista", { termo: termo })
-                  .done(function(data) {
-                    $("#sugestoes-motorista").empty();
-                    $.each(data, function(index, value) {
-                        $("#sugestoes-motorista").append("<li class='sugestao-motorista'>" + value + "</li>");
-                    });
-                });
-            }, 300);
-        });
-
-        // Seleção de motorista
-        $(document).on("click", ".sugestao-motorista", function(){
-            var motoristaSelecionado = $(this).text();
-            $("#busca-motorista").val(motoristaSelecionado);
-            $("#sugestoes-motorista").empty();
-        });
-        
-        // Carregar todas as regiões quando a página é carregada
-        $.get("/todas-regioes", function(data) {
-            window.regioesDisponiveis = data;
-        });
-
-        // Debounce para sugestão de regiões
-        let debounceTimeoutRegiao;
-        $("#busca-regiao").on("input", function(){
-            clearTimeout(debounceTimeoutRegiao);
-            var termo = $(this).val();
-            debounceTimeoutRegiao = setTimeout(function(){
-                let regioesFiltradas = window.regioesDisponiveis.filter(function(regiao) {
-                    return regiao.toLowerCase().includes(termo.toLowerCase());
-                });
-                $("#sugestoes-regiao").empty();
-                $.each(regioesFiltradas, function(index, value) {
-                    $("#sugestoes-regiao").append("<li class='sugestao-regiao'>" + value + "</li>");
-                });
-            }, 300);
-        });
-
-        // Seleção de região e adição automática à lista
-        $(document).on("click", ".sugestao-regiao", function(){
-            var regiaoSelecionada = $(this).text().trim();
-            const buscaRegiao = $("#busca-regiao");
-            const regioesAtuais = buscaRegiao.val();
-            const regioesArray = regioesAtuais.split('/').map(regiao => regiao.trim()).filter(Boolean);
-
-            // Limpar o campo de busca após seleção e evitar duplicatas
-            if (!regioesArray.includes(regiaoSelecionada)) {
-                regioesArray.push(regiaoSelecionada);
-                buscaRegiao.val('');  // Limpa o campo de busca
-
-                // Adicionar à lista de regiões selecionadas
-                const li = document.createElement('li');
-                li.textContent = regiaoSelecionada;
-                $("#itemList").append(li);
-            }
-
-            $("#sugestoes-regiao").empty(); // Limpar sugestões
-        });
-
-        // Função para atualizar o campo de entrada com as regiões selecionadas
-        function atualizarCampoRegioes() {
-            const regioes = [];
-            $("#itemList li").each(function() {
-                regioes.push($(this).text());
-            });
-            $("#busca-regiao").val(regioes.join('/'));
-        }
-
-        // Adicionar listener para o envio do formulário
-        $("form").on("submit", function() {
-            atualizarCampoRegioes();
-        });
-
-        // Função para limpar todas as regiões selecionadas
-        $("#limpar-regioes").click(function(){
-            $("#itemList").empty();  // Limpar a lista de regiões
-            $("#busca-regiao").val(''); // Limpar o campo de busca
-        });
-    });
-</script>
-
+        </form>
+    </div>    
+<script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>

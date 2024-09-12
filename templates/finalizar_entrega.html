@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finalizar Entrega</title>
+    <title>Finalizar entrega - Sistema de Gestão de Entregas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
@@ -46,16 +46,6 @@
             <button type="button" class="btn btn-primary" onclick="location.href='/dashboard'">Sair</button>
         </div>
     </div>
-    <script>
-        const botoesAlterar = document.querySelectorAll('.alterar');
-    
-        botoesAlterar.forEach(botao => {
-            botao.addEventListener('click', () => {
-                const idEntrega = botao.dataset.id;
-                const url = `/editar_entrega/${idEntrega}`; // Ajustar a URL conforme sua rota
-                window.location.href = url;
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </body>
 </html>
