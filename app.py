@@ -408,79 +408,63 @@ def atualizar_entrega():
     
     return redirect('/finalizar_entrega')  # Redireciona de volta para a lista de entregas
 
-@app.route('/consulta_relatorio', methods=['GET', 'POST'])
-def consultar_relatorio():
-    if request.method == 'GET':
-        return render_template('consulta_relatorio.html')
-    
+@app.route('/cadastra_combustivel', methods=['GET', 'POST'])
+def cadastra_combustivel():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
     if request.method == 'POST':
-        motorista = request.form['motorista']
-        data_inicial = request.form['dataInicial']
-        data_final = request.form['dataFinal']
+        try:
+            # Captura os dados do formulário
+            placa = request.form['placa'].upper()
+            data_abastecimento = request.form['data-abastecimento']
+            tipo_combustivel = request.form['tipo-combustivel'].upper()
+            quantidade_combustivel = request.form['quantidade-combustivel']
+            valor_abastecimento = request.form['valor-abastecido']  # Corrigido para 'valor-abastecido'
 
-        conn = get_db_connection()
-        cur = conn.cursor()
+            # Verifica se o veículo já está cadastrado
+            cur.execute("SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
+            veiculo_id = cur.fetchone()
 
-        # Consulta para obter os resultados filtrados
-        query = """
-            SELECT m.nome, v.placa, 
-                STRING_AGG(r.nome, ', ') AS regioes,
-                e.data_entrega, v.tipo_veiculo, 
-                e.km_rodado, e.quantidade_notas_fiscais, e.quantidade_coletas
-            FROM 
-                entrega AS e
-            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
-            INNER JOIN veiculo AS v ON e.veiculo_id = v.veiculo_id
-            INNER JOIN entrega_regiao AS er ON e.entrega_id = er.entrega_id
-            INNER JOIN regiao AS r ON er.regiao_id = r.regiao_id
-            WHERE
-                e.status = 'FINALIZADO'
-        """
+            if veiculo_id:
+                veiculo_id = veiculo_id[0]  # Extraímos o valor do fetchone() corretamente
 
-        # Filtros
-        conditions = []
-        params = []
+                # Faz a inserção dos dados de combustível
+                cur.execute("""INSERT INTO combustivel (veiculo_id, data_abastecimento, tipo_combustivel, 
+                                quantidade_combustivel, valor_abastecido) 
+                            VALUES (%s, %s, %s, %s, %s)""",
+                            (veiculo_id, data_abastecimento, tipo_combustivel, quantidade_combustivel, valor_abastecimento))
+                conn.commit()
 
-        if motorista:
-            conditions.append("m.nome = %s")
-            params.append(motorista)
-        if data_inicial:
-            conditions.append("e.data_entrega >= %s")
-            params.append(data_inicial)
-        if data_final:
-            conditions.append("e.data_entrega <= %s")
-            params.append(data_final)
+                return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
+            else:
+                return jsonify({'erro': 'Veículo não encontrado no sistema. Cadastre o veículo primeiro.'})
 
-        if conditions:
-            query += " AND " + " AND ".join(conditions)
+        except Exception as e:
+            conn.rollback()
+            return jsonify({'erro': str(e)})
+        finally:
+            cur.close()
+            conn.close()
 
-        query += """
-            GROUP BY
-                e.numero_entrega, e.data_entrega, m.nome, v.tipo_veiculo, v.placa, 
-                e.quantidade_notas_fiscais, e.quantidade_coletas, e.km_rodado
-        """
-
-        cur.execute(query, tuple(params))
-        results = cur.fetchall()
-
-        # Consulta para calcular a soma de km rodado com os mesmos filtros
-        query_total_km = """
-            SELECT SUM(e.km_rodado)
-            FROM entrega AS e
-            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
-            WHERE e.status = 'FINALIZADO'
-        """
-
-        if conditions:
-            query_total_km += " AND " + " AND ".join(conditions)
-
-        cur.execute(query_total_km, tuple(params))
-        total_km = cur.fetchone()[0]
-
+    try:
+        # Obtenha o próximo ID para exibir na página (sem incrementar a sequência)
+        cur.execute("SELECT COALESCE(MAX(veiculo_id), 0) + 1 FROM veiculo")
+        proximo_id = cur.fetchone()[0]
+    except Exception as e:
+        proximo_id = None
+        print(f"Erro ao buscar o próximo ID: {e}")
+    finally:
         cur.close()
         conn.close()
 
-        return jsonify({'resultados': results, 'total_km': total_km})
+    return render_template('cadastra_combustivel.html', proximo_id=proximo_id)
+
+@app.route('/relatorios', methods=['GET'])
+def relatorios():
+    return render_template('relatorios.html')
+
+# logica do relatorio
 
 @app.route('/sugestoes_motoristas', methods=['GET'])
 def sugestoes_motoristas():

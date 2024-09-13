@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>Cadastro de Combustível - Sistema de Gestão de Entregas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="page">  
+  <main class="dashboard-container">
+    <h1>Cadastrar combustível</h1>
+    
+    <form method="POST" action="/cadastra_combustivel" class="buttons-container">
+      <label for="placa">Placa do Veículo:</label>
+      <input type="text" class="form-control" id="placa" name="placa" placeholder="Digite a placa do veículo" required>
+
+      <label for="data-abastecimento" class="form-label">Data de Abastecimento</label>
+      <input type="date" class="form-control" id="data-abastecimento" name="data-abastecimento" required>
+
+      <div class="mb-3">
+      <label for="tipo-combustivel">Tipo de Combustível:</label>
+        <select name="tipo-combustivel" id="tipo-combustivel">
+            <option value="GASOLINA">Gasolina</option>
+            <option value="ALCOOL">Álcool</option>
+            <option value="DIESEL">Diesel</option>
+        </select>
+      </div>
+
+      <label for="quantidade-combustivel">Litros de Combustível:</label>
+      <!-- Aceita valores decimais para a quantidade de litros -->
+      <input type="number" class="form-control" id="quantidade-combustivel" name="quantidade-combustivel" step="0.01" min="0" required>
+
+      <label for="valor-abastecido">Valor do Abastecimento:</label>
+      <!-- Aceita valores decimais para o preço -->
+      <input type="number" class="form-control" id="valor-abastecido" name="valor-abastecido" step="0.01" min="0" required>      
+
+      <!-- Verifica se há uma mensagem de erro -->
+      {% if erro %}
+      <div class="alert alert-danger">
+        {{ erro }}
+      </div>
+      {% endif %}
+      
+      <input type="submit" value="Cadastrar Abastecimento">
+
+      <button type="button" onclick="location.href='/dashboard'">Sair</button>
+    </form>
+    
+  </main>
+</body>
+</html>

@@ -44,9 +44,12 @@ CREATE TABLE entrega_regiao (
     regiao_id INT REFERENCES regiao(regiao_id)
 );
 
--- Tabela Motorista_Veiculo (Tabela intermediária)
-CREATE TABLE motorista_veiculo (
+-- Tabela Combustivel
+CREATE TABLE combustivel (
     id SERIAL PRIMARY KEY,
-    motorista_id INT REFERENCES motorista(motorista_id),
-    veiculo_id INT REFERENCES veiculo(veiculo_id)
+    veiculo_id INT REFERENCES veiculo(veiculo_id),
+    data_abastecimento DATE NOT NULL,
+    tipo_combustivel CHAR (20),
+    quantidade_combustivel NUMERIC (4,2) NOT NULL,
+    valor_abastecido NUMERIC (4,2) NOT NULL
 );
