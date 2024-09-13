@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_sqlalchemy import SQLAlchemy
 import psycopg2
 from psycopg2 import errors
 
@@ -33,27 +34,22 @@ def cadastro_motorista():
         try:
             nome_motorista = request.form['motorista'].upper()
 
-            # Verifica o próximo ID antes de tentar a inserção
-            cur.execute("SELECT MAX(motorista_id) FROM motorista")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
+            # Verifica se o motorista já está cadastrado
+            cur.execute("SELECT motorista_id FROM motorista WHERE nome = %s", (nome_motorista,))
+            motorista_existente = cur.fetchone()
 
-            # Tenta inserir os dados
+            if motorista_existente:
+                # Se já existe, pega o próximo ID novamente e exibe o erro
+                cur.execute("SELECT COALESCE(MAX(motorista_id), 0) + 1 FROM motorista")
+                proximo_id = cur.fetchone()[0]
+                return render_template('cadastra_motorista.html', 
+                                       proximo_id=proximo_id, 
+                                       erro="Motorista já cadastrado.")
+
+            # Faz a inserção sem pegar o próximo ID manualmente
             cur.execute("INSERT INTO motorista (nome) VALUES (%s)", (nome_motorista,))
             conn.commit()
             return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
-        
-        except errors.UniqueViolation:
-            conn.rollback()
-            # Verifica o próximo ID novamente em caso de erro
-            cur.execute("SELECT MAX(motorista_id) FROM motorista")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
-            return render_template('cadastra_motorista.html', proximo_id=proximo_id, erro="Motorista já cadastrado.", nome_motorista=nome_motorista)
         
         except Exception as e:
             conn.rollback()
@@ -63,14 +59,12 @@ def cadastro_motorista():
             conn.close()
 
     try:
-        cur.execute("SELECT MAX(motorista_id) FROM motorista")
-        ultimo_id = cur.fetchone()[0]
-        if ultimo_id is None:
-            ultimo_id = 0
-        proximo_id = ultimo_id + 1
+        # Obtenha o próximo ID para exibir na página (sem incrementar a sequência)
+        cur.execute("SELECT COALESCE(MAX(motorista_id), 0) + 1 FROM motorista")
+        proximo_id = cur.fetchone()[0]
     except Exception as e:
         proximo_id = None
-        print(f"Erro ao buscar o último ID: {e}")
+        print(f"Erro ao buscar o próximo ID: {e}")
     finally:
         cur.close()
         conn.close()
@@ -87,29 +81,23 @@ def cadastra_veiculo():
             tipo_veiculo = request.form['tipo_veiculo'].upper()
             placa = request.form['placa'].upper()
 
-            # Verifica o próximo ID antes de tentar a inserção
-            cur.execute("SELECT MAX(veiculo_id) FROM veiculo")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
+            # Verifica se o veiculo já está cadastrado
+            cur.execute("SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
+            veiculo_existente = cur.fetchone()
 
-            # Tenta inserir dados
+            if veiculo_existente:
+                # Se já existe, pega o próximo ID novamente e exibe o erro
+                cur.execute("SELECT COALESCE(MAX(veiculo_id), 0) + 1 FROM veiculo")
+                proximo_id = cur.fetchone()[0]
+                return render_template('cadastra_veiculo.html', 
+                                       proximo_id=proximo_id, 
+                                       erro="Veículo já cadastrado.")
+
+            # Faz a inserção sem pegar o próximo ID manualmente
             cur.execute("INSERT INTO veiculo (tipo_veiculo, placa) VALUES (%s,%s)", (tipo_veiculo, placa))
             conn.commit()
             return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
         
-        except errors.UniqueViolation:
-            conn.rollback()
-            # Verifica o próximo ID novamente em caso de erro
-            cur.execute("SELECT MAX(veiculo_id) FROM veiculo")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
-
-            # Mensagem personalizada para duplicação de placa
-            return render_template('cadastra_veiculo.html', proximo_id=proximo_id, erro="Veículo já cadastrada.", placa=placa)
         except Exception as e:
             conn.rollback()
             return jsonify({'erro': str(e)})
@@ -118,11 +106,9 @@ def cadastra_veiculo():
             conn.close()
 
     try:
-        cur.execute("SELECT MAX(veiculo_id) FROM veiculo")
-        ultimo_id = cur.fetchone()[0]
-        if ultimo_id is None:
-            ultimo_id = 0
-        proximo_id = ultimo_id + 1
+        # Obtenha o próximo ID para exibir na página (sem incrementar a sequência)
+        cur.execute("SELECT COALESCE(MAX(veiculo_id), 0) + 1 FROM veiculo")
+        proximo_id = cur.fetchone()[0]
     except Exception as e:
         proximo_id = None
         print(f"Erro ao buscar o último ID: {e}")
@@ -141,28 +127,24 @@ def cadastra_regiao():
         try:
             regiao = request.form['regiao'].upper()
 
-            # Verifica o próximo ID antes de tentar a inserção
-            cur.execute("SELECT MAX(regiao_id) FROM regiao")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
+            # Verifica se o motorista já está cadastrado
+            cur.execute("SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
+            regiao_existente = cur.fetchone()
 
-            # Tentar isnerir dados
+            if regiao_existente:
+                # Se já existe, pega o próximo ID novamente e exibe o erro
+                cur.execute("SELECT COALESCE(MAX(regiao_id), 0) + 1 FROM regiao")
+                proximo_id = cur.fetchone()[0]
+                return render_template('cadastra_regiao.html', 
+                                       proximo_id=proximo_id, 
+                                       erro="Região já cadastrada.")
+
+            # Faz a inserção sem pegar o próximo ID manualmente
             cur.execute("INSERT INTO regiao (nome) VALUES (%s)", (regiao,))
             conn.commit()
             return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
         
-        except errors.UniqueViolation:
-            conn.rollback()
-            # Verifica o próximo ID novamente em caso de erro
-            cur.execute("SELECT MAX(regiao_id) FROM regiao")
-            ultimo_id = cur.fetchone()[0]
-            if ultimo_id is None:
-                ultimo_id = 0
-            proximo_id = ultimo_id + 1
-
-            return render_template('cadastra_regiao.html', proximo_id=proximo_id, erro="Regiao já cadastrada.", regiao=regiao)
+        
         except Exception as e:
             conn.rollback()
             return jsonify({'erro': str(e)})
@@ -171,11 +153,9 @@ def cadastra_regiao():
             conn.close()
 
     try:
-        cur.execute("SELECT MAX(regiao_id) FROM regiao")
-        ultimo_id = cur.fetchone()[0]
-        if ultimo_id is None:
-            ultimo_id = 0
-        proximo_id = ultimo_id + 1
+        # Obtenha o próximo ID para exibir na página (sem incrementar a sequência)
+        cur.execute("SELECT COALESCE(MAX(regiao_id), 0) + 1 FROM regiao")
+        proximo_id = cur.fetchone()[0]
     except Exception as e:
         proximo_id = None
         print(f"Erro ao buscar o último ID: {e}")
