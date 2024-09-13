@@ -460,11 +460,9 @@ def cadastra_combustivel():
 
     return render_template('cadastra_combustivel.html', proximo_id=proximo_id)
 
-@app.route('/relatorios', methods=['GET'])
-def relatorios():
-    return render_template('relatorios.html')
-
-# logica do relatorio
+@app.route('/menu_relatorios', methods=['GET'])
+def menu_relatorios():
+    return render_template('menu_relatorios.html')
 
 @app.route('/sugestoes_motoristas', methods=['GET'])
 def sugestoes_motoristas():
@@ -476,6 +474,9 @@ def sugestoes_motoristas():
     conn.close()
 
     return jsonify([motorista[0] for motorista in motoristas])
+
+# logica dos relatorio
+
 
 if __name__ == '__main__':
     app.run(debug=True)
