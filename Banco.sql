@@ -12,7 +12,7 @@ CREATE TABLE motorista (
 CREATE TABLE veiculo (
     veiculo_id SERIAL PRIMARY KEY,
     tipo_veiculo VARCHAR(20) NOT NULL,
-    placa VARCHAR(10) NOT NULL UNIQUE
+    placa CHAR(8) NOT NULL UNIQUE
 );
 
 -- Tabela Regiao
@@ -50,6 +50,6 @@ CREATE TABLE combustivel (
     veiculo_id INT REFERENCES veiculo(veiculo_id),
     data_abastecimento DATE NOT NULL,
     tipo_combustivel CHAR (20),
-    quantidade_combustivel NUMERIC (4,2) NOT NULL,
-    valor_abastecido NUMERIC (4,2) NOT NULL
+    quantidade_combustivel NUMERIC (6,4) NOT NULL,
+    valor_abastecido REAL NOT NULL
 );

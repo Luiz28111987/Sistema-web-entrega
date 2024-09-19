@@ -17,10 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Carregar sugestões de motoristas
     carregarSugestoes('/sugestoes_motoristas', 'motorista');
 
-    const form = document.getElementById('relatorioForm');
-    form.addEventListener('submit', async (event) => {
+    // Event listener para o primeiro formulário (Relatório de KM Rodados)
+    document.getElementById('relatorioConsumoCombustivelForm').addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const motorista = document.getElementById('motorista').value;
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataFinal = document.getElementById('dataFinal').value;
 
         try {
-            const response = await fetch('/consulta_relatorio', {
+            const response = await fetch('/consumo_combustivel', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -42,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             const resultados = data.resultados;
-            const totalKm = data.total_km;
+            const total_entregas = data.total_entregas;
 
             // Limpar a tabela antes de preencher com novos dados
             const tabelaBody = document.querySelector('#resultado tbody');
@@ -53,23 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${resultado[0]}</td> <!-- Motorista -->
-                    <td>${resultado[4]}</td> <!-- Veículo -->
-                    <td>${resultado[1]}</td> <!-- Placa -->
-                    <td>${resultado[5]}</td> <!-- KM Rodado -->
-                    <td>${resultado[6]}</td> <!-- Notas Transportadas -->
-                    <td>${resultado[7]}</td> <!-- Notas Coletadas -->
-                    <td>${resultado[2]}</td> <!-- Regiões -->
+                    <td>${resultado[1]}</td> <!-- Placa -->                    
+                    <td>${resultado[2]}</td> <!-- Veiculo -->  
+                    <td>${resultado[3]}</td> <!-- Total KM -->  
+                    <td>${resultado[4]}</td> <!-- Total Litros -->  
+                    <td>${resultado[5]}</td> <!-- Consumo KM/L -->  
                 `;
                 tabelaBody.appendChild(row);
             });
-
-            // Exibir o total de KM Rodado
-            const totalRow = document.createElement('tr');
-            totalRow.innerHTML = `
-                <td colspan="3"><strong>Total de KM Rodado:</strong></td>
-                <td colspan="4"><strong>${totalKm}</strong></td>
-            `;
-            tabelaBody.appendChild(totalRow);
 
         } catch (error) {
             console.error('Erro ao gerar o relatório:', error);

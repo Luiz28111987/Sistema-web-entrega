@@ -18,7 +18,7 @@
       <input type="text" id="tipo_veiculo" name="tipo_veiculo" placeholder="Digite o tipo do veiculo" required>
 
       <label for="placa">Placa do Veiculo:</label>
-      <input type="text" id="placa" name="placa" placeholder="Digite a placa do veiculo" required>
+      <input type="text" id="placa" name="placa" placeholder="Digite a placa do veiculo" minlength="8" maxlength="8"  required>
 
       <!-- Verifica se há uma mensagem de erro -->
       {% if erro %}

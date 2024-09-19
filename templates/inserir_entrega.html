@@ -18,48 +18,64 @@
         </div>
         {% endif %}
     
-        <form action="{{ url_for('inserir_entrega') }}" method="POST">
+        <form id="inserirEntregaForm" class="mb-4">
     
             <label for="numero_entrega">Número da Entrega:</label>
             <input type="text" id="numero_entrega" name="numero_entrega" value="{{ numero_entrega }}" readonly>
     
-            <label for="motorista">Motorista:</label>
-            <input type="text" id="busca-motorista" name="motorista" value="{{ motorista }}" required>
-            <ul id="sugestoes-motorista"></ul>
-    
-            <label for="placa">Placa:</label>
-            <input type="text" id="busca-placa" name="placa" value="{{ placa }}" placeholder="Digite a placa" required>
-            <ul id="sugestoes-placa"></ul>
+            <label for="motorista" class="form-label">Selecione o Motorista:</label>
+                <select name="motorista" id="motorista" class="form-select">
+                    <!-- Motoristas serão carregados aqui -->
+                </select>
+
+            <label for="placa" class="form-label">Selecione a Placa:</label>
+                <select name="placa" id="placa" class="form-select">
+                    <!-- Placas serão carregados aqui -->
+                </select>
     
             <label for="veiculo">Veículo:</label>
             <input type="text" id="veiculo" name="veiculo" value="{{ veiculo }}" required readonly>
     
-            <label for="km-inicial">KM Inicial:</label>
-            <input type="number" id="km-inicial" name="km-inicial" value="{{ km_inicial }}" required>
+            <label for="km_inicial">Digite o KM Inicial:</label>
+            <input type="number" id="km_inicial" name="km_inicial" value="{{ km_inicial }}" required>
     
-            <label for="num-notas">Número de Notas:</label>
-            <input type="number" id="num-notas" name="num-notas" value="{{ num_notas }}" required>
+            <label for="num_notas">Digite o Número de Notas:</label>
+            <input type="number" id="num_notas" name="num_notas" value="{{ num_notas }}" required>
     
-            <label for="regioes">Regiões:</label>
-            <input type="text" id="busca-regiao" name="regioes" value="{{ regioes }}" placeholder="Ex: Sobradinho/Ceilândia/Taguatinga">
-            <ul id="sugestoes-regiao"></ul>
-            <ul id="itemList"></ul>
+            <label for="regiao" class="form-label">Selecione a Região:</label>
+                <select name="regiao" id="regiao" class="form-select">
+                    <!-- Regiões serão carregados aqui -->
+                </select>
+
+            <ul id="itemList">
+                <!-- Regiões adicionadas aparecerão aqui -->
+            </ul>
+
+            <!-- Campo oculto para armazenar as regiões selecionadas -->
+            <input type="hidden" name="regioes" id="regioes_input">
     
             <div class="container">
-                <div class="row">
+                <div class="row d-flex justify-content-between">
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-primary" id="adicionar_regiao">Adicionar Região</button>
+                    </div>
                     <div class="col-md-4">
                         <button type="button" class="btn btn-primary" id="limpar-regioes">Limpar Regiões Selecionadas</button>
                     </div>
                     <div class="col-md-4">
                         <input type="submit" class="btn btn-primary" value="Inserir Entrega">
                     </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-primary" onclick="location.href='/dashboard'">Sair</button>
-                    </div>
                 </div>
+
+                <!-- Linha separada para o botão 'Sair' -->
+                <div class="row mt-3">
+                    <div class="col-md-4 offset-md-4">
+                        <a href="/dashboard" class="btn btn-primary">Sair</a>
+                    </div>
+                </div>                
             </div>
         </form>
     </div>    
-<script src="{{ url_for('static', filename='script.js') }}" defer></script>
+<script src="{{ url_for('static', filename='inserir_entrega.js') }}" defer></script>
 </body>
 </html>

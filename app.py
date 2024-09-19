@@ -173,9 +173,12 @@ def inserir_entrega():
         motorista = request.form['motorista']
         placa = request.form['placa']
         veiculo = request.form['veiculo']
-        km_inicial = request.form['km-inicial']
-        num_notas = request.form['num-notas']
-        regioes = request.form['regioes']
+        km_inicial = request.form['km_inicial']
+        num_notas = request.form['num_notas']
+        #regioes = request.form['regioes_input']
+        regioes = request.form.get('regioes', '')  # Use .get() para evitar KeyError
+
+        print(f"numero_notas{num_notas}, regioes{regioes}")
 
         data_entrega = datetime.now().strftime('%Y/%m/%d')
         hora_saida = datetime.now().strftime('%H:%M:%S')
@@ -214,6 +217,7 @@ def inserir_entrega():
             # Processar as regiões inseridas
             regioes_list = [regiao.strip() for regiao in regioes.split('/')]
             for regiao in regioes_list:
+                print(regiao)
                 # Buscar o ID da região pelo nome
                 cur.execute("SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
                 regiao_id_result = cur.fetchone()
@@ -222,6 +226,7 @@ def inserir_entrega():
                     return render_template('inserir_entrega.html', error_message=f"Região '{regiao}' não encontrada", numero_entrega=numero_entrega, motorista=motorista, placa=placa, veiculo=veiculo, km_inicial=km_inicial, num_notas=num_notas, regioes=regioes)
                 
                 regiao_id = regiao_id_result[0]
+                print(f'regiao id {regiao_id}')
 
                 # Inserir na tabela entrega_regiao
                 cur.execute('''
@@ -260,83 +265,6 @@ def numero_entrega():
         conn.close()
 
     return jsonify(proximo_id=proximo_id)
-
-@app.route('/sugestoes-motorista', methods=['GET'])
-def sugestoes_motorista():
-    termo = request.args.get('termo')
-    # Suponha que você tenha uma tabela `veiculos` no banco de dados
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT nome FROM motorista WHERE nome ILIKE %s", (f'%{termo}%',))
-    sugestoes = cur.fetchall()
-    cur.close()
-    conn.close()
-    return jsonify([sugestao[0] for sugestao in sugestoes])
-
-@app.route('/sugestoes-placa', methods=['GET'])
-def sugestoes_placa():
-    termo = request.args.get('termo')
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    # Consulta para trazer as placas que correspondem ao termo digitado
-    cur.execute("SELECT placa FROM veiculo WHERE placa ILIKE %s", (f'%{termo}%',))
-    sugestoes = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return jsonify([sugestao[0] for sugestao in sugestoes])
-
-@app.route('/get-tipo-veiculo', methods=['GET'])
-def get_tipo_veiculo():
-    placa = request.args.get('placa')
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    # Consulta para obter o tipo de veículo com base na placa
-    cur.execute("SELECT tipo_veiculo FROM veiculo WHERE placa = %s", (placa,))
-    tipo_veiculo = cur.fetchone()
-    
-    cur.close()
-    conn.close()
-    
-    # Verifica se encontrou o tipo de veículo, caso contrário retorna uma mensagem
-    if tipo_veiculo:
-        return jsonify(tipo_veiculo=tipo_veiculo[0])
-    else:
-        return jsonify({"error": "Tipo de veículo não encontrado"}), 404
-    
-@app.route('/todas-regioes', methods=['GET'])
-def todas_regioes():
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT nome FROM regiao")  # Ajuste o nome da tabela e coluna conforme necessário
-        regioes = cur.fetchall()
-        regioes_list = [regiao[0] for regiao in regioes]
-    finally:
-        cur.close()
-        conn.close()
-    
-    return jsonify(regioes_list)
-
-@app.route('/sugestoes-regiao', methods=['GET'])
-def sugestoes_regiao():
-    termo = request.args.get('termo', '').lower()
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT nome FROM regiao WHERE LOWER(nome) LIKE %s", (f'%{termo}%',))
-        regioes = cur.fetchall()
-        regioes_list = [regiao[0] for regiao in regioes]
-    finally:
-        cur.close()
-        conn.close()
-    
-    return jsonify(regioes_list)
 
 @app.route('/finalizar_entrega', methods=['GET'])
 def finalizar_entrega():
@@ -460,23 +388,427 @@ def cadastra_combustivel():
 
     return render_template('cadastra_combustivel.html', proximo_id=proximo_id)
 
-@app.route('/menu_relatorios', methods=['GET'])
-def menu_relatorios():
-    return render_template('menu_relatorios.html')
+# Logica de sugestõeS
+@app.route('/sugestoes_placas', methods=['GET'])
+def sugestoes_placas():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT placa FROM veiculo ORDER BY placa")
+    placas = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return jsonify([placa[0] for placa in placas])
+
+@app.route('/get-tipo-veiculo', methods=['GET'])
+def get_tipo_veiculo():
+    placa = request.args.get('placa')
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Consulta para obter o tipo de veículo com base na placa
+    cur.execute("SELECT tipo_veiculo FROM veiculo WHERE placa = %s", (placa,))
+    tipo_veiculo = cur.fetchone()
+    
+    cur.close()
+    conn.close()
+    
+    # Verifica se encontrou o tipo de veículo, caso contrário retorna uma mensagem
+    if tipo_veiculo:
+        return jsonify(tipo_veiculo=tipo_veiculo[0])
+    else:
+        return jsonify({"error": "Tipo de veículo não encontrado"}), 404
 
 @app.route('/sugestoes_motoristas', methods=['GET'])
 def sugestoes_motoristas():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT DISTINCT nome FROM motorista")
+    cur.execute("SELECT DISTINCT nome FROM motorista ORDER BY nome")
     motoristas = cur.fetchall()
     cur.close()
     conn.close()
 
     return jsonify([motorista[0] for motorista in motoristas])
 
-# logica dos relatorio
+@app.route('/sugestoes_regioes', methods=['GET'])
+def sugestoes_regioes():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT DISTINCT nome FROM regiao ORDER BY nome")
+    regioes = cur.fetchall()
+    cur.close()
+    conn.close()
 
+    return jsonify([regiao[0] for regiao in regioes])
+
+# logica dos relatorio
+@app.route('/menu_relatorios', methods=['GET'])
+def menu_relatorios():
+    return render_template('menu_relatorios.html')
+
+@app.route('/relatorio_km_rodados', methods=['GET', 'POST'])
+def relatorio_km_rodados():
+    if request.method == 'GET':
+        return render_template('relatorio_km_rodados.html')
+    
+    if request.method == 'POST':
+        motorista = request.form['motorista']
+        data_inicial = request.form['dataInicial']
+        data_final = request.form['dataFinal']
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Consulta para obter os resultados filtrados
+        query = """
+            SELECT TO_CHAR(e.data_entrega, 'DD/MM/YYYY') AS data_formatada,
+                m.nome, v.placa, v.tipo_veiculo, SUM(e.km_rodado) AS km_rodado_total_por_data
+            FROM
+                entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+	        INNER JOIN veiculo AS v ON e.veiculo_id = v.veiculo_id
+	        WHERE 
+		        e.status = 'FINALIZADO'
+        """
+
+        # Filtros
+        conditions = []
+        params = []
+
+        if motorista:
+            conditions.append("m.nome = %s")
+            params.append(motorista)
+        if data_inicial:
+            conditions.append("e.data_entrega >= %s")
+            params.append(data_inicial)
+        if data_final:
+            conditions.append("e.data_entrega <= %s")
+            params.append(data_final)
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY
+		        e.data_entrega, m.nome, v.placa,v.tipo_veiculo
+	        ORDER BY
+		        e.data_entrega, m.nome
+        """
+
+        cur.execute(query, tuple(params))
+        results = cur.fetchall()
+
+        # Consulta para calcular a soma de km rodado com os mesmos filtros
+        query_total_km = """
+            SELECT SUM(e.km_rodado)
+            FROM entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+            WHERE e.status = 'FINALIZADO'
+        """
+
+        if conditions:
+            query_total_km += " AND " + " AND ".join(conditions)
+
+        cur.execute(query_total_km, tuple(params))
+        total_km = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'resultados': results, 'total_km': total_km})
+    
+@app.route('/km_rodado_entrega', methods=['GET', 'POST'])
+def km_rodado_entrega():
+    if request.method == 'GET':
+        return render_template('km_rodado_entrega.html')
+    
+    if request.method == 'POST':
+        motorista = request.form['motorista']
+        data_inicial = request.form['dataInicial']
+        data_final = request.form['dataFinal']
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Consulta para obter os resultados filtrados
+        query = """
+            SELECT e.numero_entrega, TO_CHAR(e.data_entrega, 'DD/MM/YYYY') AS data_formatada, 
+	            m.nome, v.placa, v.tipo_veiculo, MAX(e.km_rodado) AS km_rodado_maximo,
+	            STRING_AGG(r.nome, ', ') AS regioes
+	        FROM 
+		        entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+            INNER JOIN veiculo AS v ON e.veiculo_id = v.veiculo_id
+            INNER JOIN entrega_regiao AS er ON e.entrega_id = er.entrega_id
+            INNER JOIN regiao AS r ON r.regiao_id = er.regiao_id
+            WHERE 
+		        e.status = 'FINALIZADO'
+        """
+
+        # Filtros
+        conditions = []
+        params = []
+
+        if motorista:
+            conditions.append("m.nome = %s")
+            params.append(motorista)
+        if data_inicial:
+            conditions.append("e.data_entrega >= %s")
+            params.append(data_inicial)
+        if data_final:
+            conditions.append("e.data_entrega <= %s")
+            params.append(data_final)
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY
+                e.numero_entrega, e.data_entrega, m.nome, v.placa, v.tipo_veiculo
+            ORDER BY
+                e.numero_entrega
+        """
+
+        cur.execute(query, tuple(params))
+        results = cur.fetchall()
+
+        # Consulta para calcular a soma de km rodado com os mesmos filtros
+        query_total_km = """
+            SELECT SUM(e.km_rodado)
+            FROM entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+            WHERE e.status = 'FINALIZADO'
+        """
+
+        if conditions:
+            query_total_km += " AND " + " AND ".join(conditions)
+
+        cur.execute(query_total_km, tuple(params))
+        total_km = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'resultados': results, 'total_km': total_km})
+    
+@app.route('/entrega_regiao', methods=['GET', 'POST'])
+def entrega_regiao():
+    if request.method == 'GET':
+        return render_template('entrega_regiao.html')
+    
+    if request.method == 'POST':
+        regiao = request.form['regiao']
+        data_inicial = request.form['dataInicial']
+        data_final = request.form['dataFinal']
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Consulta para obter os resultados filtrados
+        query = """
+            SELECT r.nome, COUNT(e.numero_entrega) AS total_entregas
+                FROM 
+                    entrega AS e
+                INNER JOIN entrega_regiao AS er ON e.entrega_id = er.entrega_id
+                INNER JOIN regiao AS r ON r.regiao_id = er.regiao_id
+                WHERE 
+                    e.status = 'FINALIZADO'
+        """
+
+        # Filtros
+        conditions = []
+        params = []
+
+        if regiao:
+            conditions.append("r.nome = %s")
+            params.append(regiao)
+        if data_inicial:
+            conditions.append("e.data_entrega >= %s")
+            params.append(data_inicial)
+        if data_final:
+            conditions.append("e.data_entrega <= %s")
+            params.append(data_final)
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY
+                r.nome
+            ORDER BY
+                total_entregas DESC
+        """
+
+        cur.execute(query, tuple(params))
+        results = cur.fetchall()
+
+        # Consulta para calcular a soma de entregas com os mesmos filtros
+        query_total_entregas = """
+            SELECT COUNT(e.numero_entrega) AS total_entregas
+            FROM 
+                entrega AS e
+            INNER JOIN entrega_regiao AS er ON e.entrega_id = er.entrega_id
+            INNER JOIN regiao AS r ON r.regiao_id = er.regiao_id
+            WHERE 
+                e.status = 'FINALIZADO'
+        """
+
+        if conditions:
+            query_total_entregas += " AND " + " AND ".join(conditions)
+
+        cur.execute(query_total_entregas, tuple(params))
+        total_entregas = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'resultados': results, 'total_entregas': total_entregas})
+    
+@app.route('/entrega_motorista', methods=['GET', 'POST'])
+def entrega_motorista():
+    if request.method == 'GET':
+        return render_template('entrega_motorista.html')
+    
+    if request.method == 'POST':
+        motorista = request.form['motorista']
+        data_inicial = request.form['dataInicial']
+        data_final = request.form['dataFinal']
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Consulta para obter os resultados filtrados
+        query = """
+            SELECT m.nome, COUNT(e.numero_entrega) AS total_entregas
+            FROM 
+                entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+            WHERE 
+                e.status = 'FINALIZADO'
+        """
+
+        # Filtros
+        conditions = []
+        params = []
+
+        if motorista:
+            conditions.append("m.nome = %s")
+            params.append(motorista)
+        if data_inicial:
+            conditions.append("e.data_entrega >= %s")
+            params.append(data_inicial)
+        if data_final:
+            conditions.append("e.data_entrega <= %s")
+            params.append(data_final)
+
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY
+                m.nome
+            ORDER BY
+                total_entregas DESC
+        """
+
+        cur.execute(query, tuple(params))
+        results = cur.fetchall()
+
+        # Consulta para calcular a soma de entregas com os mesmos filtros
+        query_total_entregas = """
+            SELECT COUNT(e.numero_entrega) AS total_entregas
+            FROM 
+                entrega AS e
+            INNER JOIN motorista AS m ON e.motorista_id = m.motorista_id
+            WHERE 
+                e.status = 'FINALIZADO'
+        """
+
+        if conditions:
+            query_total_entregas += " AND " + " AND ".join(conditions)
+
+        cur.execute(query_total_entregas, tuple(params))
+        total_entregas = cur.fetchone()[0]
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'resultados': results, 'total_entregas': total_entregas})
+    
+@app.route('/consumo_combustivel', methods=['GET', 'POST'])
+def consumo_combustivel():
+    if request.method == 'GET':
+        return render_template('consumo_combustivel.html')
+
+    if request.method == 'POST':
+        motorista = request.form['motorista']
+        data_inicial = request.form['dataInicial']
+        data_final = request.form['dataFinal']
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Consulta para obter os resultados filtrados
+        query = """
+            WITH entregas_por_veiculo AS (
+                SELECT veiculo_id, SUM(km_rodado) AS total_km
+                FROM entrega
+                GROUP BY veiculo_id
+            ),
+            combustivel_por_veiculo AS (
+                SELECT veiculo_id, SUM(quantidade_combustivel) AS total_litros
+                FROM combustivel
+                GROUP BY veiculo_id
+            )
+            SELECT DISTINCT
+                m.nome, 
+                v.placa, 
+                v.tipo_veiculo,
+                e.total_km, 
+                c.total_litros, 
+                CASE 
+                    WHEN c.total_litros = 0 THEN NULL -- Evita divisão por zero
+                    ELSE e.total_km / c.total_litros 
+                END AS km_por_litro
+            FROM entrega AS ent
+            INNER JOIN motorista AS m ON ent.motorista_id = m.motorista_id
+            INNER JOIN veiculo AS v ON ent.veiculo_id = v.veiculo_id
+            INNER JOIN entregas_por_veiculo e ON ent.veiculo_id = e.veiculo_id
+            INNER JOIN combustivel_por_veiculo c ON ent.veiculo_id = c.veiculo_id
+            WHERE ent.status = 'FINALIZADO'
+        """
+
+        # Filtros
+        conditions = []
+        params = []
+
+        if motorista:
+            conditions.append("m.nome = %s")
+            params.append(motorista)
+        if data_inicial:
+            conditions.append("ent.data_entrega >= %s")
+            params.append(data_inicial)
+        if data_final:
+            conditions.append("ent.data_entrega <= %s")
+            params.append(data_final)
+
+        # Aplicar condições extras ao WHERE existente
+        if conditions:
+            query += " AND " + " AND ".join(conditions)
+
+        query += """
+            GROUP BY m.nome, v.placa, v.tipo_veiculo, e.total_km, c.total_litros
+            ORDER BY km_por_litro DESC
+        """
+
+        # Executa a consulta
+        cur.execute(query, tuple(params))
+        results = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({'resultados': results})
 
 if __name__ == '__main__':
     app.run(debug=True)
