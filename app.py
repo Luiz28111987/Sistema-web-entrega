@@ -7,6 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
+
 def get_db_connection():
     conn = psycopg2.connect(
         database="trabalho_extensao",
@@ -16,9 +17,12 @@ def get_db_connection():
         port="5432"
     )
     return conn
+
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     return render_template('login.html')
+
 
 @app.route('/dashboard', methods=['GET'])
 def dashboard():
@@ -35,22 +39,26 @@ def cadastro_motorista():
             nome_motorista = request.form['motorista'].upper()
 
             # Verifica se o motorista já está cadastrado
-            cur.execute("SELECT motorista_id FROM motorista WHERE nome = %s", (nome_motorista,))
+            cur.execute(
+                "SELECT motorista_id FROM motorista WHERE nome = %s", (nome_motorista,))
             motorista_existente = cur.fetchone()
 
             if motorista_existente:
                 # Se já existe, pega o próximo ID novamente e exibe o erro
-                cur.execute("SELECT COALESCE(MAX(motorista_id), 0) + 1 FROM motorista")
+                cur.execute(
+                    "SELECT COALESCE(MAX(motorista_id), 0) + 1 FROM motorista")
                 proximo_id = cur.fetchone()[0]
-                return render_template('cadastra_motorista.html', 
-                                       proximo_id=proximo_id, 
+                return render_template('cadastra_motorista.html',
+                                       proximo_id=proximo_id,
                                        erro="Motorista já cadastrado.")
 
             # Faz a inserção sem pegar o próximo ID manualmente
-            cur.execute("INSERT INTO motorista (nome) VALUES (%s)", (nome_motorista,))
+            cur.execute("INSERT INTO motorista (nome) VALUES (%s)",
+                        (nome_motorista,))
             conn.commit()
-            return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
-        
+            # Redireciona para o dashboard após cadastro
+            return redirect(url_for('dashboard'))
+
         except Exception as e:
             conn.rollback()
             return jsonify({'erro': str(e)})
@@ -71,6 +79,7 @@ def cadastro_motorista():
 
     return render_template('cadastra_motorista.html', proximo_id=proximo_id)
 
+
 @app.route('/cadastra_veiculo', methods=['GET', 'POST'])
 def cadastra_veiculo():
     conn = get_db_connection()
@@ -82,22 +91,26 @@ def cadastra_veiculo():
             placa = request.form['placa'].upper()
 
             # Verifica se o veiculo já está cadastrado
-            cur.execute("SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
+            cur.execute(
+                "SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
             veiculo_existente = cur.fetchone()
 
             if veiculo_existente:
                 # Se já existe, pega o próximo ID novamente e exibe o erro
-                cur.execute("SELECT COALESCE(MAX(veiculo_id), 0) + 1 FROM veiculo")
+                cur.execute(
+                    "SELECT COALESCE(MAX(veiculo_id), 0) + 1 FROM veiculo")
                 proximo_id = cur.fetchone()[0]
-                return render_template('cadastra_veiculo.html', 
-                                       proximo_id=proximo_id, 
+                return render_template('cadastra_veiculo.html',
+                                       proximo_id=proximo_id,
                                        erro="Veículo já cadastrado.")
 
             # Faz a inserção sem pegar o próximo ID manualmente
-            cur.execute("INSERT INTO veiculo (tipo_veiculo, placa) VALUES (%s,%s)", (tipo_veiculo, placa))
+            cur.execute(
+                "INSERT INTO veiculo (tipo_veiculo, placa) VALUES (%s,%s)", (tipo_veiculo, placa))
             conn.commit()
-            return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
-        
+            # Redireciona para o dashboard após cadastro
+            return redirect(url_for('dashboard'))
+
         except Exception as e:
             conn.rollback()
             return jsonify({'erro': str(e)})
@@ -118,6 +131,7 @@ def cadastra_veiculo():
 
     return render_template('cadastra_veiculo.html', proximo_id=proximo_id)
 
+
 @app.route('/cadastra_regiao', methods=['GET', 'POST'])
 def cadastra_regiao():
     conn = get_db_connection()
@@ -128,23 +142,25 @@ def cadastra_regiao():
             regiao = request.form['regiao'].upper()
 
             # Verifica se o motorista já está cadastrado
-            cur.execute("SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
+            cur.execute(
+                "SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
             regiao_existente = cur.fetchone()
 
             if regiao_existente:
                 # Se já existe, pega o próximo ID novamente e exibe o erro
-                cur.execute("SELECT COALESCE(MAX(regiao_id), 0) + 1 FROM regiao")
+                cur.execute(
+                    "SELECT COALESCE(MAX(regiao_id), 0) + 1 FROM regiao")
                 proximo_id = cur.fetchone()[0]
-                return render_template('cadastra_regiao.html', 
-                                       proximo_id=proximo_id, 
+                return render_template('cadastra_regiao.html',
+                                       proximo_id=proximo_id,
                                        erro="Região já cadastrada.")
 
             # Faz a inserção sem pegar o próximo ID manualmente
             cur.execute("INSERT INTO regiao (nome) VALUES (%s)", (regiao,))
             conn.commit()
-            return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
-        
-        
+            # Redireciona para o dashboard após cadastro
+            return redirect(url_for('dashboard'))
+
         except Exception as e:
             conn.rollback()
             return jsonify({'erro': str(e)})
@@ -165,6 +181,7 @@ def cadastra_regiao():
 
     return render_template('cadastra_regiao.html', proximo_id=proximo_id)
 
+
 @app.route('/inserir_entrega', methods=['GET', 'POST'])
 def inserir_entrega():
     if request.method == 'POST':
@@ -175,8 +192,9 @@ def inserir_entrega():
         veiculo = request.form['veiculo']
         km_inicial = request.form['km_inicial']
         num_notas = request.form['num_notas']
-        #regioes = request.form['regioes_input']
-        regioes = request.form.get('regioes', '')  # Use .get() para evitar KeyError
+        # regioes = request.form['regioes_input']
+        # Use .get() para evitar KeyError
+        regioes = request.form.get('regioes', '')
 
         print(f"numero_notas{num_notas}, regioes{regioes}")
 
@@ -191,14 +209,16 @@ def inserir_entrega():
             cur = conn.cursor()
 
             # Buscar o ID do motorista pelo nome
-            cur.execute("SELECT motorista_id FROM motorista WHERE nome = %s", (motorista,))
+            cur.execute(
+                "SELECT motorista_id FROM motorista WHERE nome = %s", (motorista,))
             motorista_id_result = cur.fetchone()
             if not motorista_id_result:
                 return render_template('inserir_entrega.html', error_message="Motorista não encontrado", numero_entrega=numero_entrega, motorista=motorista, placa=placa, veiculo=veiculo, km_inicial=km_inicial, num_notas=num_notas, regioes=regioes)
             motorista_id = motorista_id_result[0]
 
             # Buscar o ID do veículo pela placa
-            cur.execute("SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
+            cur.execute(
+                "SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
             veiculo_id_result = cur.fetchone()
             if not veiculo_id_result:
                 return render_template('inserir_entrega.html', error_message="Veículo não encontrado", numero_entrega=numero_entrega, motorista=motorista, placa=placa, veiculo=veiculo, km_inicial=km_inicial, num_notas=num_notas, regioes=regioes)
@@ -219,12 +239,13 @@ def inserir_entrega():
             for regiao in regioes_list:
                 print(regiao)
                 # Buscar o ID da região pelo nome
-                cur.execute("SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
+                cur.execute(
+                    "SELECT regiao_id FROM regiao WHERE nome = %s", (regiao,))
                 regiao_id_result = cur.fetchone()
 
                 if not regiao_id_result:
                     return render_template('inserir_entrega.html', error_message=f"Região '{regiao}' não encontrada", numero_entrega=numero_entrega, motorista=motorista, placa=placa, veiculo=veiculo, km_inicial=km_inicial, num_notas=num_notas, regioes=regioes)
-                
+
                 regiao_id = regiao_id_result[0]
                 print(f'regiao id {regiao_id}')
 
@@ -248,6 +269,7 @@ def inserir_entrega():
 
     return render_template('inserir_entrega.html')
 
+
 @app.route('/numero_entrega', methods=['GET'])
 def numero_entrega():
     conn = get_db_connection()
@@ -266,11 +288,12 @@ def numero_entrega():
 
     return jsonify(proximo_id=proximo_id)
 
+
 @app.route('/finalizar_entrega', methods=['GET'])
 def finalizar_entrega():
     conn = get_db_connection()
     cur = conn.cursor()
-    
+
     # Consulta para obter os dados
     cur.execute("""SELECT e.numero_entrega, e.data_entrega, e.hora_saida, e.km_inicial, e.km_final,
     m.nome, v.tipo_veiculo, v.placa, e.quantidade_notas_fiscais, e.quantidade_coletas,
@@ -288,14 +311,15 @@ GROUP BY
     m.nome, v.tipo_veiculo, v.placa, e.quantidade_notas_fiscais, e.quantidade_coletas,
     e.status""")
     resultados = cur.fetchall()  # Usar fetchall() para obter todos os resultados
-    
+
     cur.close()
     conn.close()
-    
+
     if not resultados:
         return render_template('finalizar_entrega.html', dados=resultados)
-    
+
     return render_template('finalizar_entrega.html', dados=resultados)
+
 
 @app.route('/editar_entrega/<int:id>', methods=['GET'])
 def editar_entrega(id):
@@ -305,18 +329,19 @@ def editar_entrega(id):
     entrega = cur.fetchone()
     cur.close()
     conn.close()
-    
+
     if entrega:
         return render_template('editar_entrega.html', entrega=entrega)
     else:
         return "Entrega não encontrada", 404
+
 
 @app.route('/atualizar_entrega', methods=['POST'])
 def atualizar_entrega():
     numero_entrega = request.form['numero_entrega']
     km_final = request.form['km_final']
     quantidade_coletas = request.form['quantidade_coletas']
-    
+
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -333,8 +358,10 @@ def atualizar_entrega():
     finally:
         cur.close()
         conn.close()
-    
-    return redirect('/finalizar_entrega')  # Redireciona de volta para a lista de entregas
+
+    # Redireciona de volta para a lista de entregas
+    return redirect('/finalizar_entrega')
+
 
 @app.route('/cadastra_combustivel', methods=['GET', 'POST'])
 def cadastra_combustivel():
@@ -348,14 +375,17 @@ def cadastra_combustivel():
             data_abastecimento = request.form['data-abastecimento']
             tipo_combustivel = request.form['tipo-combustivel'].upper()
             quantidade_combustivel = request.form['quantidade-combustivel']
-            valor_abastecimento = request.form['valor-abastecido']  # Corrigido para 'valor-abastecido'
+            # Corrigido para 'valor-abastecido'
+            valor_abastecimento = request.form['valor-abastecido']
 
             # Verifica se o veículo já está cadastrado
-            cur.execute("SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
+            cur.execute(
+                "SELECT veiculo_id FROM veiculo WHERE placa = %s", (placa,))
             veiculo_id = cur.fetchone()
 
             if veiculo_id:
-                veiculo_id = veiculo_id[0]  # Extraímos o valor do fetchone() corretamente
+                # Extraímos o valor do fetchone() corretamente
+                veiculo_id = veiculo_id[0]
 
                 # Faz a inserção dos dados de combustível
                 cur.execute("""INSERT INTO combustivel (veiculo_id, data_abastecimento, tipo_combustivel, 
@@ -364,7 +394,8 @@ def cadastra_combustivel():
                             (veiculo_id, data_abastecimento, tipo_combustivel, quantidade_combustivel, valor_abastecimento))
                 conn.commit()
 
-                return redirect(url_for('dashboard'))  # Redireciona para o dashboard após cadastro
+                # Redireciona para o dashboard após cadastro
+                return redirect(url_for('dashboard'))
             else:
                 return jsonify({'erro': 'Veículo não encontrado no sistema. Cadastre o veículo primeiro.'})
 
@@ -389,6 +420,8 @@ def cadastra_combustivel():
     return render_template('cadastra_combustivel.html', proximo_id=proximo_id)
 
 # Logica de sugestõeS
+
+
 @app.route('/sugestoes_placas', methods=['GET'])
 def sugestoes_placas():
     conn = get_db_connection()
@@ -400,24 +433,26 @@ def sugestoes_placas():
 
     return jsonify([placa[0] for placa in placas])
 
+
 @app.route('/get-tipo-veiculo', methods=['GET'])
 def get_tipo_veiculo():
     placa = request.args.get('placa')
     conn = get_db_connection()
     cur = conn.cursor()
-    
+
     # Consulta para obter o tipo de veículo com base na placa
     cur.execute("SELECT tipo_veiculo FROM veiculo WHERE placa = %s", (placa,))
     tipo_veiculo = cur.fetchone()
-    
+
     cur.close()
     conn.close()
-    
+
     # Verifica se encontrou o tipo de veículo, caso contrário retorna uma mensagem
     if tipo_veiculo:
         return jsonify(tipo_veiculo=tipo_veiculo[0])
     else:
         return jsonify({"error": "Tipo de veículo não encontrado"}), 404
+
 
 @app.route('/sugestoes_motoristas', methods=['GET'])
 def sugestoes_motoristas():
@@ -429,6 +464,7 @@ def sugestoes_motoristas():
     conn.close()
 
     return jsonify([motorista[0] for motorista in motoristas])
+
 
 @app.route('/sugestoes_regioes', methods=['GET'])
 def sugestoes_regioes():
@@ -442,15 +478,18 @@ def sugestoes_regioes():
     return jsonify([regiao[0] for regiao in regioes])
 
 # logica dos relatorio
+
+
 @app.route('/menu_relatorios', methods=['GET'])
 def menu_relatorios():
     return render_template('menu_relatorios.html')
+
 
 @app.route('/relatorio_km_rodados', methods=['GET', 'POST'])
 def relatorio_km_rodados():
     if request.method == 'GET':
         return render_template('relatorio_km_rodados.html')
-    
+
     if request.method == 'POST':
         motorista = request.form['motorista']
         data_inicial = request.form['dataInicial']
@@ -516,12 +555,13 @@ def relatorio_km_rodados():
         conn.close()
 
         return jsonify({'resultados': results, 'total_km': total_km})
-    
+
+
 @app.route('/km_rodado_entrega', methods=['GET', 'POST'])
 def km_rodado_entrega():
     if request.method == 'GET':
         return render_template('km_rodado_entrega.html')
-    
+
     if request.method == 'POST':
         motorista = request.form['motorista']
         data_inicial = request.form['dataInicial']
@@ -590,12 +630,13 @@ def km_rodado_entrega():
         conn.close()
 
         return jsonify({'resultados': results, 'total_km': total_km})
-    
+
+
 @app.route('/entrega_regiao', methods=['GET', 'POST'])
 def entrega_regiao():
     if request.method == 'GET':
         return render_template('entrega_regiao.html')
-    
+
     if request.method == 'POST':
         regiao = request.form['regiao']
         data_inicial = request.form['dataInicial']
@@ -663,12 +704,13 @@ def entrega_regiao():
         conn.close()
 
         return jsonify({'resultados': results, 'total_entregas': total_entregas})
-    
+
+
 @app.route('/entrega_motorista', methods=['GET', 'POST'])
 def entrega_motorista():
     if request.method == 'GET':
         return render_template('entrega_motorista.html')
-    
+
     if request.method == 'POST':
         motorista = request.form['motorista']
         data_inicial = request.form['dataInicial']
@@ -734,7 +776,8 @@ def entrega_motorista():
         conn.close()
 
         return jsonify({'resultados': results, 'total_entregas': total_entregas})
-    
+
+
 @app.route('/consumo_combustivel', methods=['GET', 'POST'])
 def consumo_combustivel():
     if request.method == 'GET':
@@ -809,6 +852,7 @@ def consumo_combustivel():
         conn.close()
 
         return jsonify({'resultados': results})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
